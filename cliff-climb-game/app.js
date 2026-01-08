@@ -1,5 +1,5 @@
 /*
-How to run: Open cliff-climb-game/index.html with Live Server.
+How to run: Open cliff-climb-game/index.html with Live Server .
 Assets: Place bg.png, climber.png, climb.mp3, fall.mp3 in cliff-climb-game/assets/.
 */
 
