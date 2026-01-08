@@ -1,14 +1,15 @@
-const TOTAL_STEPS = 25;
-const STEP_INTERVAL_MS = 820;
+const TOTAL_STEPS = 20;
+const STEP_INTERVAL_MS = 1050;
 const AUDIO_TAIL_MS = 1000;
+const EDGE_HOLD_MS = STEP_INTERVAL_MS;
 const FALL_DURATION_MS = 2000;
 const BASE_STAGE_WIDTH = 900;
 const BASE_STAGE_HEIGHT = 550;
 const BACKGROUND_SHIFT_Y = 40;
 
 // Tape endpoints sampled from the background image (normalized to bg.png size).
-const PATH_START = { x: 0.1925, y: 0.6401 };
-const PATH_END = { x: 0.7844, y: 0.2245 };
+const PATH_START = { x: 0.1919, y: 0.6406 };
+const PATH_END = { x: 0.7766, y: 0.2309 };
 const PATH_INSET = 0.0;
 const BASE_ROTATION_OFFSET_DEG = 0;
 const FOOT_OFFSET = {
@@ -332,6 +333,7 @@ function prepareForClimb() {
 }
 
 function finishAfterHold(needsFall) {
+  const holdMs = needsFall ? EDGE_HOLD_MS : AUDIO_TAIL_MS;
   state.holdTimeout = setTimeout(() => {
     state.holdTimeout = null;
     if (needsFall) {

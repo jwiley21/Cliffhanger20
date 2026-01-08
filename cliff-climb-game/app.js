@@ -3,17 +3,18 @@ How to run: Open cliff-climb-game/index.html with Live Server.
 Assets: Place bg.png, climber.png, climb.mp3, fall.mp3 in cliff-climb-game/assets/.
 */
 
-const TOTAL_STEPS = 25;
-const STEP_INTERVAL_MS = 820;
-const EDGE_HOLD_MS = 500;
+const TOTAL_STEPS = 20;
+const STEP_INTERVAL_MS = 1050;
+const CLIMB_AUDIO_TAIL_MS = 1000;
+const EDGE_HOLD_MS = STEP_INTERVAL_MS;
 const FALL_DURATION_MS = 2000;
 const BASE_STAGE_WIDTH = 900;
 const BASE_STAGE_HEIGHT = 550;
 const BACKGROUND_SHIFT_Y = 40; // Base pixels to reveal the full title.
 
 // Tape endpoints sampled from the background image (normalized to bg.png size).
-const PATH_START = { x: 0.1925, y: 0.6401 };
-const PATH_END = { x: 0.7844, y: 0.2245 };
+const PATH_START = { x: 0.1919, y: 0.6406 };
+const PATH_END = { x: 0.7766, y: 0.2309 };
 const PATH_INSET = 0.0;
 const BASE_ROTATION_OFFSET_DEG = 0;
 const FOOT_OFFSET = {
@@ -69,6 +70,7 @@ const state = {
   intervalId: null,
   edgeTimeout: null,
   fallTimeout: null,
+  audioStopTimeout: null,
   bgSize: {
     width: 1152,
     height: 896,
@@ -120,6 +122,11 @@ function clearTimers() {
     clearTimeout(state.fallTimeout);
     state.fallTimeout = null;
   }
+
+  if (state.audioStopTimeout) {
+    clearTimeout(state.audioStopTimeout);
+    state.audioStopTimeout = null;
+  }
 }
 
 function setControlsRunning(running) {
@@ -145,6 +152,17 @@ function tryPlay(audio) {
   if (playPromise && typeof playPromise.catch === "function") {
     playPromise.catch(() => {});
   }
+}
+
+function scheduleClimbAudioStop() {
+  if (state.audioStopTimeout) {
+    clearTimeout(state.audioStopTimeout);
+  }
+
+  state.audioStopTimeout = setTimeout(() => {
+    stopAudio(climbAudio);
+    state.audioStopTimeout = null;
+  }, CLIMB_AUDIO_TAIL_MS);
 }
 
 function trimClimberImage() {
@@ -366,14 +384,13 @@ function prepareForClimb() {
 }
 
 function finishClimb() {
-  stopAudio(climbAudio);
+  scheduleClimbAudioStop();
   state.isRunning = false;
   setControlsRunning(false);
   setStatus(`Holding at step ${state.currentStep}.`);
 }
 
 function queueFall() {
-  stopAudio(climbAudio);
   setStatus("On the edge...");
   state.edgeTimeout = setTimeout(() => {
     triggerFall();
